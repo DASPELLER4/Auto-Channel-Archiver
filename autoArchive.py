@@ -4,7 +4,7 @@ class Archive():
         self.channels = channels
         if not(os.path.exists(fileLocation)):
             with open(fileLocation,"w+") as File:
-                File.write("")
+                File.write("a\n"*len(channels))
         self.fileLocation = fileLocation
         self.archiveLocations = archiveLocations
         self.root = root
