@@ -8,6 +8,8 @@ class Archive():
         self.fileLocation = fileLocation
         self.archiveLocations = archiveLocations
         self.root = root
+        if root[-1] != '/':
+            self.root+='/'
         self.currentIndex = 0
         with open(fileLocation) as fileCount:
             self.latestVideos = fileCount.readlines()
