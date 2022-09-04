@@ -5,8 +5,6 @@ Requires:
 
     #pip packages
     colorama
-    urllib
-    json
     #programs
     yt-dlp
     
