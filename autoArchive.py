@@ -1,6 +1,9 @@
-import urllib.request,json,subprocess,time,os,colorama
+import urllib.request,json,subprocess,time,os,colorama,random
 class Archive():
     def __init__(self,channels,archiveLocations,fileLocation,root):
+        apijson = urllib.request.urlopen("https://api.invidious.io/instances.json?pretty=1&sort_by=api")
+        apijson = json.load(apijson)
+        self.api = apijson
         self.channels = channels
         if not(os.path.exists(fileLocation)):
             with open(fileLocation,"w+") as File:
@@ -16,9 +19,9 @@ class Archive():
     def download(self,video):
         print(colorama.Fore.LIGHTBLUE_EX+"Downloading " + video,colorama.Style.RESET_ALL)
         try:
-            subprocess.check_output(["yt-dlp", "-f", "best", "-ciw", "-o", (self.root + self.archiveLocations[self.currentIndex] + "/%(title)s.%(ext)s"), video],stderr=subprocess.DEVNULL)
-            #subprocess.run(["notify-send",(self.author + ' has uploaded a new video!'), self.title]) #uncomment if you want notifications but the invidious latest videos randomizes the top two videos, meaning that you get spammed with notifications
-        except subprocess.CalledProcessError:
+            subprocess.check_output(["yt-dlp", "-f", "b", "-ciw", "-o", (self.root + self.archiveLocations[self.currentIndex] + "/%(title)s.%(ext)s"), video],stderr=subprocess.DEVNULL)
+        except subprocess.CalledProcessError as e:
+            print(e)
             print(colorama.Fore.RED+"FAILURE! " + video + " isn't available!",colorama.Style.RESET_ALL,end="")
             return -1
         print(colorama.Fore.LIGHTBLUE_EX+"SUCCESS! Downloaded " + video,colorama.Style.RESET_ALL,end="")
@@ -26,11 +29,16 @@ class Archive():
     def archive(self):
         os.system("clear")
         base_video_url = 'https://www.youtube.com/watch?v='
-        base_search_url = 'https://invidious.namazso.eu/api/v1/channels/latest/'
         for j,x in enumerate(self.channels):
+            rans = random.randint(1,5)
+            base_search_url = 'https://' + self.api[(j+rans)%5][0] + '/api/v1/channels/latest/'
             first_url = base_search_url+x
             video_url = ""
-            inp = urllib.request.urlopen(first_url,timeout=15)
+            try:
+                inp = urllib.request.urlopen(first_url,timeout=15)
+            except Exception as e:
+                print(colorama.Fore.RED + str(e) + " for " + self.archiveLocations[self.currentIndex] + colorama.Fore.YELLOW + " Using API " + self.api[(j+rans)%5][0] + colorama.Style.RESET_ALL)
+                continue
             resp = json.load(inp)
             try:
                 video_url = base_video_url + resp[0]['videoId']
@@ -62,13 +70,13 @@ class Archive():
                 else:
                     print((colorama.Fore.GREEN+self.author + '\'s videos are up to date! With the latest being ' + self.title) if len(colorama.Fore.GREEN+self.author + '\'s videos are up to date! With the latest being ' + self.title) < 82 else (colorama.Fore.GREEN+self.author + '\'s videos are up to date! With the latest being ' + self.title)[:81]+'...')
             except:
-                print(colorama.Fore.RED + self.archiveLocations[j] + " has no videos!")
+                print(colorama.Fore.RED + self.archiveLocations[j] + "'s API response is empty! " + colorama.Fore.YELLOW + "Using API " + self.api[(j+rans)%5][0] + colorama.Style.RESET_ALL)
             print(colorama.Style.RESET_ALL,end="")
 dictionary = {'<channel id beginning with UC>': '<Download destination in root folder>'}
 try:
     archive = Archive([x for x in dictionary], [dictionary[x] for x in dictionary],'<name of autoarchiver data file>','<root folder of all archives>')
     archive.archive()
-    print("Completed Full Sweep: Waiting 20SEC")
-    time.sleep(20)
+    print("Completed Full Sweep: Waiting 10 SEC")
+    time.sleep(10)
 except urllib.error.HTTPError:
     pass
