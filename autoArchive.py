@@ -30,53 +30,50 @@ class Archive():
         os.system("clear")
         base_video_url = 'https://www.youtube.com/watch?v='
         for j,x in enumerate(self.channels):
-            rans = random.randint(1,5)
-            base_search_url = 'https://' + self.api[(j+rans)%5][0] + '/api/v1/channels/latest/'
-            first_url = base_search_url+x
-            video_url = ""
-            try:
-                inp = urllib.request.urlopen(first_url,timeout=15)
-            except Exception as e:
-                print(colorama.Fore.RED + str(e) + " for " + self.archiveLocations[self.currentIndex] + colorama.Fore.YELLOW + " Using API " + self.api[(j+rans)%5][0] + colorama.Style.RESET_ALL)
-                continue
-            resp = json.load(inp)
-            try:
-                video_url = base_video_url + resp[0]['videoId']
-                self.author = resp[0]['author']
-                self.title = resp[0]['title']
+            s = 0
+            while not(s):
+                rans = random.randint(1,5)
+                base_search_url = 'https://' + self.api[rans][0] + '/api/v1/channels/latest/'
+                first_url = base_search_url+x
+                s = 1
                 try:
-                    self.latestVideos[j].replace('\n','')
-                except:
-                    cont = 1
-                    while cont:
-                        with open(self.fileLocation,"a") as File:
-                            File.write("\n.")
-                        self.latestVideos.append("")
-                        cont = 0
-                        try:
-                            self.latestVideos[j].replace('\n','')
-                        except:
-                            cont = 1
-                if self.latestVideos[j].replace('\n','') != video_url:
-                    print(first_url)
-                    print(colorama.Fore.RED + '!!!\n' + self.author + ' has uploaded a new video \"' + self.title + "\", URL:", video_url + '\n!!!')
-                    print(colorama.Style.RESET_ALL,end="")
-                    self.currentIndex = j
-                    if(self.download(video_url)==0):
-                        self.latestVideos[j] = video_url+'\n'
-                        with open(self.fileLocation,"w") as fileCount:
-                            fileCount.write("".join(self.latestVideos))
-                    print()
-                else:
-                    print((colorama.Fore.GREEN+self.author + '\'s videos are up to date! With the latest being ' + self.title) if len(colorama.Fore.GREEN+self.author + '\'s videos are up to date! With the latest being ' + self.title) < 82 else (colorama.Fore.GREEN+self.author + '\'s videos are up to date! With the latest being ' + self.title)[:81]+'...')
+                    inp = urllib.request.urlopen(first_url)
+                    resp = json.load(inp)
+                    resp[0]['author']
+                except Exception as e:
+                    s = 0
+            video_url = base_video_url + resp[0]['videoId']
+            self.author = resp[0]['author']
+            self.title = resp[0]['title']
+            try:
+                self.latestVideos[j].replace('\n','')
             except:
-                print(colorama.Fore.RED + self.archiveLocations[j] + "'s API response is empty! " + colorama.Fore.YELLOW + "Using API " + self.api[(j+rans)%5][0] + colorama.Style.RESET_ALL)
+                cont = 1
+                while cont:
+                    with open(self.fileLocation,"a") as File:
+                        File.write("\n.")
+                    self.latestVideos.append("")
+                    cont = 0
+                    try:
+                        self.latestVideos[j].replace('\n','')
+                    except:
+                        cont = 1
+            if self.latestVideos[j].replace('\n','') != video_url:
+                print(first_url)
+                print(colorama.Fore.RED + '!!!\n' + self.author + ' has uploaded a new video \"' + self.title + "\", URL:", video_url + '\n!!!')
+                print(colorama.Style.RESET_ALL,end="")
+                self.currentIndex = j
+                if(self.download(video_url)==0):
+                    self.latestVideos[j] = video_url+'\n'
+                    with open(self.fileLocation,"w") as fileCount:
+                        fileCount.write("".join(self.latestVideos))
+                print()
+            else:
+                print((colorama.Fore.GREEN+self.author + '\'s videos are up to date! With the latest being ' + self.title) if len(colorama.Fore.GREEN+self.author + '\'s videos are up to date! With the latest being ' + self.title) < 82 else (colorama.Fore.GREEN+self.author + '\'s videos are up to date! With the latest being ' + self.title)[:81]+'...')
             print(colorama.Style.RESET_ALL,end="")
 dictionary = {'<channel id beginning with UC>': '<Download destination in root folder>'}
-try:
-    archive = Archive([x for x in dictionary], [dictionary[x] for x in dictionary],'<name of autoarchiver data file>','<root folder of all archives>')
-    archive.archive()
-    print("Completed Full Sweep: Waiting 10 SEC")
-    time.sleep(10)
-except urllib.error.HTTPError:
-    pass
+archive = Archive([x for x in dictionary], [dictionary[x] for x in dictionary],'<name of autoarchiver data file>','<root folder of all archives>')
+archive.archive()
+sleeptime = 10
+print("Sweep completed, sleeping", sleeptime, "seconds")
+time.sleep(sleeptime)
