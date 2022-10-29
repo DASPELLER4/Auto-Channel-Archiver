@@ -1,9 +1,6 @@
 import urllib.request,json,subprocess,time,os,colorama,random
 class Archive():
     def __init__(self,channels,archiveLocations,fileLocation,root):
-        apijson = urllib.request.urlopen("https://api.invidious.io/instances.json?pretty=1&sort_by=api")
-        apijson = json.load(apijson)
-        self.api = apijson
         self.channels = channels
         if not(os.path.exists(fileLocation)):
             with open(fileLocation,"w+") as File:
@@ -27,6 +24,9 @@ class Archive():
         print(colorama.Fore.LIGHTBLUE_EX+"SUCCESS! Downloaded " + video,colorama.Style.RESET_ALL,end="")
         return 0
     def archive(self):
+        apijson = urllib.request.urlopen("https://api.invidious.io/instances.json?pretty=1&sort_by=api")
+        apijson = json.load(apijson)
+        self.api = apijson
         os.system("clear")
         base_video_url = 'https://www.youtube.com/watch?v='
         for j,x in enumerate(self.channels):
