@@ -24,14 +24,18 @@ class Archive():
         print(colorama.Fore.LIGHTBLUE_EX+"SUCCESS! Downloaded " + video,colorama.Style.RESET_ALL,end="")
         return 0
     def archive(self):
+        os.system("clear")
         apijson = urllib.request.urlopen("https://api.invidious.io/instances.json?pretty=1&sort_by=api")
         apijson = json.load(apijson)
         self.api = apijson
-        os.system("clear")
         base_video_url = 'https://www.youtube.com/watch?v='
         for j,x in enumerate(self.channels):
+            self.currentIndex = j
             s = 0
+            c = 0
             while not(s):
+                if(c>8):
+                    break
                 rans = random.randint(1,5)
                 base_search_url = 'https://' + self.api[rans][0] + '/api/v1/channels/latest/'
                 first_url = base_search_url+x
@@ -41,7 +45,11 @@ class Archive():
                     resp = json.load(inp)
                     resp[0]['author']
                 except Exception as e:
+                    c+=1
                     s = 0
+            if(c>8):
+                print(colorama.Fore.RED+"Couldn't access " + self.archiveLocations[self.currentIndex] + "'s video list" + colorama.Style.RESET_ALL)
+                continue
             video_url = base_video_url + resp[0]['videoId']
             self.author = resp[0]['author']
             self.title = resp[0]['title']
@@ -62,7 +70,6 @@ class Archive():
                 print(first_url)
                 print(colorama.Fore.RED + '!!!\n' + self.author + ' has uploaded a new video \"' + self.title + "\", URL:", video_url + '\n!!!')
                 print(colorama.Style.RESET_ALL,end="")
-                self.currentIndex = j
                 if(self.download(video_url)==0):
                     self.latestVideos[j] = video_url+'\n'
                     with open(self.fileLocation,"w") as fileCount:
