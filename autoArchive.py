@@ -36,22 +36,23 @@ class Archive():
             while not(s):
                 if(c>8):
                     break
-                rans = random.randint(1,5)
-                base_search_url = 'https://' + self.api[rans][0] + '/api/v1/channels/latest/'
+                base_search_url = 'https://' + self.api[c][0] + '/api/v1/channels/latest/'
                 first_url = base_search_url+x
                 s = 1
                 try:
                     inp = urllib.request.urlopen(first_url)
                     resp = json.load(inp)
-                    resp[0]['author']
+                    resp[0]['videoId']
                 except Exception as e:
-                    c+=1
+                    c += 1
                     s = 0
             if(c>8):
                 print(colorama.Fore.RED+"Couldn't access " + self.archiveLocations[self.currentIndex] + "'s video list" + colorama.Style.RESET_ALL)
                 continue
             video_url = base_video_url + resp[0]['videoId']
             self.author = resp[0]['author']
+            if(self.author == ""):
+                self.author = self.archiveLocations[self.currentIndex]
             self.title = resp[0]['title']
             try:
                 self.latestVideos[j].replace('\n','')
