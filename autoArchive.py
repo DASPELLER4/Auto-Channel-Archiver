@@ -1,4 +1,4 @@
-import urllib.request,json,subprocess,time,os,colorama,random
+import json,subprocess,time,os,colorama,random,requests
 class Archive():
     def __init__(self,channels,archiveLocations,fileLocation,root):
         self.channels = channels
@@ -18,15 +18,14 @@ class Archive():
         try:
             subprocess.check_output(["yt-dlp", "-f", "b", "-ciw", "-o", (self.root + self.archiveLocations[self.currentIndex] + "/%(title)s.%(ext)s"), video],stderr=subprocess.DEVNULL)
         except subprocess.CalledProcessError as e:
-            print(e)
             print(colorama.Fore.RED+"FAILURE! " + video + " isn't available!",colorama.Style.RESET_ALL,end="")
             return -1
         print(colorama.Fore.LIGHTBLUE_EX+"SUCCESS! Downloaded " + video,colorama.Style.RESET_ALL,end="")
         return 0
     def archive(self):
         os.system("clear")
-        apijson = urllib.request.urlopen("https://api.invidious.io/instances.json?pretty=1&sort_by=api")
-        apijson = json.load(apijson)
+        apijson = requests.get("https://api.invidious.io/instances.json?pretty=1&sort_by=api").text
+        apijson = json.loads(apijson)
         self.api = apijson
         base_video_url = 'https://www.youtube.com/watch?v='
         for j,x in enumerate(self.channels):
@@ -40,8 +39,8 @@ class Archive():
                 first_url = base_search_url+x
                 s = 1
                 try:
-                    inp = urllib.request.urlopen(first_url)
-                    resp = json.load(inp)
+                    inp = requests.get(first_url).text
+                    resp = json.loads(inp)['videos']
                     resp[0]['videoId']
                 except Exception as e:
                     c += 1
